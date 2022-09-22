@@ -1,18 +1,29 @@
 from pyket import network, packet
 from colorama import Fore
 import os
+import argparse
+
+# create argument parser
+parser = argparse.ArgumentParser(description="Pyket")
+parser.add_argument(
+    "-i",
+    "--interface",
+    help="Interface to capture packets on",
+    default=network.get_interface(),
+)
+parser.add_argument(
+    "-f",
+    "--filter",
+    help="Filter packets by protocol",
+    default="all",
+    choices=["all", "tcp", "udp"],
+)
 
 
 def main():
-    os.system("clear") if os.name != "nt" else os.system("cls")
 
-    print(
-        f"{Fore.LIGHTRED_EX}Welcome to Pyket!{Fore.RESET}"
-        + "\n\nPyket is still in development, it lacks features.\n"
-    )
-    input(f"{Fore.LIGHTRED_EX}Press enter to begin capture... ")
-
-    packet.capture(network.get_interface())
+    args = parser.parse_args()
+    packet.capture(args.interface, args.filter)
 
 
 if __name__ == "__main__":
