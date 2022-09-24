@@ -106,7 +106,7 @@ def TCP(packet, eth_length, protocol, iph_length):
         printHeader(packet)
 
         print("\nPACKET TYPE: TCP\n")
-        
+
         # Version
         ip_header = packet[eth_length : 20 + eth_length]
         iph = unpack("!BBHHHBBH4s4s", ip_header)
@@ -152,7 +152,7 @@ def IPv4(packet, eth_length, eth_protocol, filter):
 
         s_addr = socket.inet_ntoa(iph[8])
         d_addr = socket.inet_ntoa(iph[9])
-        
+
         # Looks bad, but it works
         if filter == "all":
             UDP(packet, eth_length, protocol, iph_length)
