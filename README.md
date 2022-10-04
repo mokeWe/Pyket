@@ -11,10 +11,12 @@ A simple (and bad) packet sniffer written in Python 3.
 
  - Automatically detect wireless network interface
  - IPv4 sniffing
- - Support for TCP, UDP, and raw IP packets
+ - Support for TCP and UDP packets with more to come...
 
 ## Installation
-Clone this repository, cd into the cloned directory. Install ``colorama`` via pip.
+Clone this repository.
+cd into the cloned directory. 
+Install ``colorama`` via pip.
 
 ```bash
 git clone https://github.com/mokeWe/Pyket
