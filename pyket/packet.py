@@ -5,8 +5,7 @@ from pyket import network
 
 
 def unpack(fmt, data):
-    size = struct.calcsize(fmt)
-    return struct.unpack(fmt, data[:size])
+    return struct.unpack(fmt, data[: struct.calcsize(fmt)])
 
 
 def print_data(data: str) -> None:
