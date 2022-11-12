@@ -8,7 +8,7 @@ def unpack(fmt, data):
     return struct.unpack(fmt, data[: struct.calcsize(fmt)])
 
 
-def print_data(data: str) -> None:
+def printData(data: str) -> None:
     try:
         print(f"Data: \n{Fore.LIGHTRED_EX}" + data.decode("utf-8") + f"{Fore.RESET}")
     except:
@@ -73,7 +73,7 @@ def UDP(packet, eth_length, protocol, iph_length):
         print("Length: " + str(length))
         print("Checksum: " + str(checksum))
 
-        print_data(data)
+        printData(data)
     else:
         pass
 
@@ -124,7 +124,7 @@ def TCP(packet, eth_length, protocol, iph_length):
         print("Acknowledgement: " + str(acknowledgement))
         print("TCP Header Length: " + str(tcph_length))
 
-        print_data(data)
+        printData(data)
     else:
         pass
 

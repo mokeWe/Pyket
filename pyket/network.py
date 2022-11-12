@@ -20,6 +20,9 @@ def eth_addr(a):
 
 
 # MAC address
-def get_mac(self) -> str:
-    mac = hex(uuid.getnode())[2:]
-    return ":".join([mac[i : i + 2] for i in range(0, len(mac), 2)])
+get_mac = lambda self: ":".join(
+    [
+        hex(uuid.getnode())[2:][i : i + 2]
+        for i in range(0, len(hex(uuid.getnode())[2:]), 2)
+    ]
+)

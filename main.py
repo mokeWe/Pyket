@@ -5,12 +5,15 @@ import argparse
 
 
 def main():
+    if os.geteuid() != 0:
+        print(Fore.RED + "[-] Root privileges are required to run this program")
+        exit()
 
     parser = argparse.ArgumentParser(description="Pyket")
     parser.add_argument(
         "-i",
         "--interface",
-        help="Interface to capture packets on",
+        help="Interface to capture packets on, default is the first interface found",
         default=network.get_interface(),
     )
     parser.add_argument(
@@ -27,5 +30,4 @@ def main():
 
 
 if __name__ == "__main__":
-
     main()
