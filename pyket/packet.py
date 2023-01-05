@@ -1,40 +1,46 @@
+"""contains the packet class and functions to parse packets"""
 import socket
 import struct
 from colorama import Fore
-from pyket import network
+from pyket import network  # pylint: disable=import-error
 
 
 def unpack(fmt, data):
+    """unpacks data using the given format"""
     return struct.unpack(fmt, data[: struct.calcsize(fmt)])
 
 
-def printData(data: str) -> None:
+def print_data(data: str) -> None:
+    """prints the data of a packet"""
     try:
         print(f"Data: \n{Fore.LIGHTRED_EX}" + data.decode("utf-8") + f"{Fore.RESET}")
-    except:
+    except UnicodeDecodeError:
         pass
 
 
-def printHeader(packet):
+def print_header(packet):
+    """prints the header of a packet"""
     print(f"{Fore.GREEN}-{Fore.RESET}" * 60)
-    print(f"{Fore.GREEN}Destination MAC: {Fore.RESET}" + network.eth_addr(packet[0:6]))
+    print(f"{Fore.GREEN}Destination MAC: {Fore.RESET}" + network.eth_addr(packet[:6]))
     print(
         f"{Fore.LIGHTRED_EX}Source MAC: {Fore.RESET}" + network.eth_addr(packet[6:12])
     )
 
 
-def printBody(version, ihl, ttl, protocol, s_addr, d_addr):
-    print("Version: " + str(version))
-    print("IP Header Length: " + str(ihl))
-    print("TTL: " + str(ttl))
-    print("Protocol: " + str(protocol))
-    print("Source Address: " + str(s_addr))
-    print("Destination Address: " + str(d_addr))
-    print("")
+def print_body(version, ihl, ttl, protocol, s_addr, d_addr):
+    """prints the body of a packet"""
+    print(
+        f"{Fore.LIGHTRED_EX}Version: {Fore.RESET}{version}\n"
+        f"{Fore.LIGHTRED_EX}IP Header Length: {Fore.RESET}{ihl}\n"
+        f"{Fore.LIGHTRED_EX}TTL: {Fore.RESET}{ttl}\n"
+        f"{Fore.LIGHTRED_EX}Protocol: {Fore.RESET}{protocol}\n"
+        f"{Fore.LIGHTRED_EX}Source Address: {Fore.RESET}{s_addr}\n"
+        f"{Fore.LIGHTRED_EX}Destination Address: {Fore.RESET}{d_addr}\n"
+    )
 
 
 def UDP(packet, eth_length, protocol, iph_length):
-    # UDP packets
+    """parses UDP packets"""
     if protocol == 17:
         u = iph_length + eth_length
         udph_length = 8
@@ -52,7 +58,7 @@ def UDP(packet, eth_length, protocol, iph_length):
         h_size = eth_length + iph_length + udph_length
         data = packet[h_size:]
 
-        printHeader(packet)
+        print_header(packet)
 
         print("\nPACKET TYPE: UDP\n")
 
@@ -66,20 +72,20 @@ def UDP(packet, eth_length, protocol, iph_length):
         s_addr = socket.inet_ntoa(iph[8])
         d_addr = socket.inet_ntoa(iph[9])
 
-        printBody(version, ihl, ttl, protocol, s_addr, d_addr)
+        print_body(version, ihl, ttl, protocol, s_addr, d_addr)
 
         print("Source Port: " + str(source_port))
         print("Destination Port: " + str(dest_port))
         print("Length: " + str(length))
         print("Checksum: " + str(checksum))
 
-        printData(data)
+        print_data(data)
     else:
         pass
 
 
 def TCP(packet, eth_length, protocol, iph_length):
-    # TCP protocol
+    """parses TCP packets"""
     if protocol == 6:
         t = iph_length + eth_length
         tcp_header = packet[t : t + 20]
@@ -102,7 +108,7 @@ def TCP(packet, eth_length, protocol, iph_length):
         h_size = eth_length + iph_length + tcph_length * 4
         data = packet[h_size:]
 
-        printHeader(packet)
+        print_header(packet)
 
         print("\nPACKET TYPE: TCP\n")
 
@@ -116,7 +122,7 @@ def TCP(packet, eth_length, protocol, iph_length):
         s_addr = socket.inet_ntoa(iph[8])
         d_addr = socket.inet_ntoa(iph[9])
 
-        printBody(version, ihl, ttl, protocol, s_addr, d_addr)
+        print_body(version, ihl, ttl, protocol, s_addr, d_addr)
 
         print("Source Port: " + str(source_port))
         print("Destination Port: " + str(dest_port))
@@ -124,12 +130,12 @@ def TCP(packet, eth_length, protocol, iph_length):
         print("Acknowledgement: " + str(acknowledgement))
         print("TCP Header Length: " + str(tcph_length))
 
-        printData(data)
+        print_data(data)
     else:
         pass
 
 
-def IPv4(packet, eth_length, eth_protocol, filter):
+def IPv4(packet, eth_length, eth_protocol, filter_protocol):
     if eth_protocol == 8:
         # Parse IP header
         ip_header = packet[eth_length : 20 + eth_length]
@@ -139,30 +145,25 @@ def IPv4(packet, eth_length, eth_protocol, filter):
 
         # Version
         version_ihl = iph[0]
-        version = version_ihl >> 4
         ihl = version_ihl & 0xF
 
         # IP header length
         iph_length = ihl * 4
-        ttl = iph[5]
 
         # Protocol
         protocol = iph[6]
 
-        s_addr = socket.inet_ntoa(iph[8])
-        d_addr = socket.inet_ntoa(iph[9])
-
         # Looks bad, but it works
-        if filter == "all":
+        if filter_protocol == "all":
             UDP(packet, eth_length, protocol, iph_length)
             TCP(packet, eth_length, protocol, iph_length)
-        elif filter == "udp":
+        elif filter_protocol == "udp":
             UDP(packet, eth_length, protocol, iph_length)
-        elif filter == "tcp":
+        elif filter_protocol == "tcp":
             TCP(packet, eth_length, protocol, iph_length)
 
 
-def capture(interface: str, filter) -> None:
+def capture(interface: str, filter_protocol) -> None:
     s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.ntohs(3))
     s.bind((interface, 0))
     while True:
@@ -174,4 +175,4 @@ def capture(interface: str, filter) -> None:
         eth = unpack("!6s6sH", eth_header)
         eth_protocol = socket.ntohs(eth[2])
 
-        IPv4(packet, eth_length, eth_protocol, filter=filter)
+        IPv4(packet, eth_length, eth_protocol, filter_protocol=filter_protocol)

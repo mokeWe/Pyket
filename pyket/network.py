@@ -10,19 +10,22 @@ def get_interface() -> str:
         try:
             if netifaces.ifaddresses(interface)[netifaces.AF_INET][0]["addr"]:
                 return interface
-        except:
+        except KeyError:
             continue
 
 
 # Convert a string of 6 characters of ethernet address into a dash separated hex string
 def eth_addr(a):
-    return "%.2x:%.2x:%.2x:%.2x:%.2x:%.2x" % (a[0], a[1], a[2], a[3], a[4], a[5])
+    """Convert a string of 6 characters of ethernet address into a dash separated hex string"""
+    return ":".join(["%02x" % i for i in a])
 
 
 # MAC address
-get_mac = lambda self: ":".join(
-    [
-        hex(uuid.getnode())[2:][i : i + 2]
-        for i in range(0, len(hex(uuid.getnode())[2:]), 2)
-    ]
-)
+def get_mac() -> str:
+    """Returns the MAC address of the computer in the format 00:00:00:00:00:00"""
+    return ":".join(
+        [
+            hex(uuid.getnode())[2:][i : i + 2]
+            for i in range(0, len(hex(uuid.getnode())[2:]), 2)
+        ]
+    )
