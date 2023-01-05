@@ -39,14 +39,14 @@ def print_body(version, ihl, ttl, protocol, s_addr, d_addr):
     )
 
 
-def UDP(packet, eth_length, protocol, iph_length):
-    """parses UDP packets"""
+def udp(packet, eth_length, protocol, iph_length):
+    """parses udp packets"""
     if protocol == 17:
-        u = iph_length + eth_length
+        u = iph_length + eth_length  # pylint: disable=invalid-name
         udph_length = 8
         udp_header = packet[u : u + 8]
 
-        # Unpack the UDP header
+        # Unpack the udp header
         udph = unpack("!HHHH", udp_header)
 
         source_port = udph[0]
@@ -74,17 +74,19 @@ def UDP(packet, eth_length, protocol, iph_length):
 
         print_body(version, ihl, ttl, protocol, s_addr, d_addr)
 
-        print("Source Port: " + str(source_port))
-        print("Destination Port: " + str(dest_port))
-        print("Length: " + str(length))
-        print("Checksum: " + str(checksum))
+        print(
+            f"{Fore.LIGHTRED_EX}Source Port: {Fore.RESET}{source_port}\n"
+            f"{Fore.LIGHTRED_EX}Destination Port: {Fore.RESET}{dest_port}\n"
+            f"{Fore.LIGHTRED_EX}Length: {Fore.RESET}{length}\n"
+            f"{Fore.LIGHTRED_EX}Checksum: {Fore.RESET}{checksum}\n"
+        )
 
         print_data(data)
     else:
         pass
 
 
-def TCP(packet, eth_length, protocol, iph_length):
+def tcp(packet, eth_length, protocol, iph_length):
     """parses TCP packets"""
     if protocol == 6:
         t = iph_length + eth_length
@@ -124,18 +126,21 @@ def TCP(packet, eth_length, protocol, iph_length):
 
         print_body(version, ihl, ttl, protocol, s_addr, d_addr)
 
-        print("Source Port: " + str(source_port))
-        print("Destination Port: " + str(dest_port))
-        print("Sequence Number: " + str(sequence))
-        print("Acknowledgement: " + str(acknowledgement))
-        print("TCP Header Length: " + str(tcph_length))
+        print(
+            f"{Fore.LIGHTRED_EX}Source Port: {Fore.RESET}{source_port}\n"
+            f"{Fore.LIGHTRED_EX}Destination Port: {Fore.RESET}{dest_port}\n"
+            f"{Fore.LIGHTRED_EX}Sequence Number: {Fore.RESET}{sequence}\n"
+            f"{Fore.LIGHTRED_EX}Acknowledgement: {Fore.RESET}{acknowledgement}\n"
+            f"{Fore.LIGHTRED_EX}TCP Header Length: {Fore.RESET}{tcph_length}\n"
+        )
 
         print_data(data)
     else:
         pass
 
 
-def IPv4(packet, eth_length, eth_protocol, filter_protocol):
+def ipv4(packet, eth_length, eth_protocol, filter_protocol):
+    """parses IPv4 packets"""
     if eth_protocol == 8:
         # Parse IP header
         ip_header = packet[eth_length : 20 + eth_length]
@@ -153,17 +158,17 @@ def IPv4(packet, eth_length, eth_protocol, filter_protocol):
         # Protocol
         protocol = iph[6]
 
-        # Looks bad, but it works
         if filter_protocol == "all":
-            UDP(packet, eth_length, protocol, iph_length)
-            TCP(packet, eth_length, protocol, iph_length)
+            udp(packet, eth_length, protocol, iph_length)
+            tcp(packet, eth_length, protocol, iph_length)
         elif filter_protocol == "udp":
-            UDP(packet, eth_length, protocol, iph_length)
+            udp(packet, eth_length, protocol, iph_length)
         elif filter_protocol == "tcp":
-            TCP(packet, eth_length, protocol, iph_length)
+            tcp(packet, eth_length, protocol, iph_length)
 
 
 def capture(interface: str, filter_protocol) -> None:
+    """captures packets"""
     s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.ntohs(3))
     s.bind((interface, 0))
     while True:
@@ -175,4 +180,4 @@ def capture(interface: str, filter_protocol) -> None:
         eth = unpack("!6s6sH", eth_header)
         eth_protocol = socket.ntohs(eth[2])
 
-        IPv4(packet, eth_length, eth_protocol, filter_protocol=filter_protocol)
+        ipv4(packet, eth_length, eth_protocol, filter_protocol=filter_protocol)

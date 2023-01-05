@@ -1,9 +1,11 @@
+"""Network related functions"""
 import uuid
 import netifaces
 
 
 # Main wireless interface
 def get_interface() -> str:
+    """Returns the main wireless interface"""
     for interface in netifaces.interfaces():
         if interface == "lo":
             continue

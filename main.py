@@ -1,10 +1,12 @@
-from pyket import network, packet
-from colorama import Fore
+"""Pyket - A simple packet sniffer written in Python"""
 import os
 import argparse
+from colorama import Fore
+from pyket import network, packet
 
 
 def main():
+    """Main function"""
     if os.geteuid() != 0:
         print(Fore.RED + "[-] Root privileges are required to run this program")
         exit()
