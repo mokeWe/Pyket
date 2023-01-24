@@ -1,4 +1,4 @@
-"""Pyket - A simple packet sniffer written in Python"""
+"""Packet sniffer and parsing"""
 import os
 import argparse
 from colorama import Fore

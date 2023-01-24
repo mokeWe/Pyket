@@ -2,7 +2,7 @@
 import socket
 import struct
 from colorama import Fore
-from pyket import network  # pylint: disable=import-error
+from pyket import network
 
 
 def unpack(fmt, data):
@@ -42,7 +42,7 @@ def print_body(version, ihl, ttl, protocol, s_addr, d_addr):
 def udp(packet, eth_length, protocol, iph_length):
     """parses udp packets"""
     if protocol == 17:
-        u = iph_length + eth_length  # pylint: disable=invalid-name
+        u = iph_length + eth_length
         udph_length = 8
         udp_header = packet[u : u + 8]
 
@@ -62,7 +62,7 @@ def udp(packet, eth_length, protocol, iph_length):
 
         print("\nPACKET TYPE: UDP\n")
 
-        # Defining these in every function is bad, but it works
+        # Defining these in every function is necessary, but ugly
         ip_header = packet[eth_length : 20 + eth_length]
         iph = unpack("!BBHHHBBH4s4s", ip_header)
         version_ihl = iph[0]
